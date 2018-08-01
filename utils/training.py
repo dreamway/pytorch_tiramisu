@@ -50,8 +50,9 @@ def error(preds, targets):
     bs,h,w = preds.size()
     n_pixels = bs*h*w
     incorrect = preds.ne(targets).cpu().sum()
-    err = incorrect/n_pixels
-    return round(err,5)
+    err = float(incorrect)/n_pixels
+    #return round(err,5)
+    return err
 
 def train(model, trn_loader, optimizer, criterion, epoch):
     model.train()
@@ -67,9 +68,11 @@ def train(model, trn_loader, optimizer, criterion, epoch):
         loss.backward()
         optimizer.step()
 
-        trn_loss += loss.data[0]
+        #trn_loss += loss.data[0]
+        trn_loss += loss.item()
         pred = get_predictions(output)
         trn_error += error(pred, targets.data.cpu())
+        print('trn_loss:', trn_loss, "trn_error:", trn_error)
 
     trn_loss /= len(trn_loader)
     trn_error /= len(trn_loader)
@@ -79,13 +82,16 @@ def test(model, test_loader, criterion, epoch=1):
     model.eval()
     test_loss = 0
     test_error = 0
-    for data, target in test_loader:
-        data = Variable(data.cuda(), volatile=True)
-        target = Variable(target.cuda())
-        output = model(data)
-        test_loss += criterion(output, target).data[0]
-        pred = get_predictions(output)
-        test_error += error(pred, target.data.cpu())
+    with torch.no_grad():
+        for data, target in test_loader:
+            data = Variable(data.cuda())
+            target = Variable(target.cuda())
+            output = model(data)
+            test_loss += criterion(output, target).data[0]
+            pred = get_predictions(output)
+            test_error += error(pred, target.data.cpu())
+            print("test_loss:", test_loss, ", test_error:", test_error)
+
     test_loss /= len(test_loader)
     test_error /= len(test_loader)
     return test_loss, test_error
@@ -115,13 +121,14 @@ def predict(model, input_loader, n_batches=1):
     return predictions
 
 def view_sample_predictions(model, loader, n):
-    inputs, targets = next(iter(loader))
-    data = Variable(inputs.cuda(), volatile=True)
-    label = Variable(targets.cuda())
-    output = model(data)
-    pred = get_predictions(output)
-    batch_size = inputs.size(0)
-    for i in range(min(n, batch_size)):
-        img_utils.view_image(inputs[i])
-        img_utils.view_annotated(targets[i])
-        img_utils.view_annotated(pred[i])
+    with torch.no_grad():
+        inputs, targets = next(iter(loader))
+        data = Variable(inputs.cuda())
+        label = Variable(targets.cuda())
+        output = model(data)
+        pred = get_predictions(output)
+        batch_size = inputs.size(0)
+        for i in range(min(n, batch_size)):
+            img_utils.view_image(inputs[i])
+            img_utils.view_annotated(targets[i])
+            img_utils.view_annotated(pred[i])

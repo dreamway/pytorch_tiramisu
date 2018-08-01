@@ -3,8 +3,8 @@ import torch
 import torch.utils.data as data
 import numpy as np
 from PIL import Image
-from torchvision.datasets.folder import is_image_file, default_loader
-
+#from torchvision.datasets.folder import is_image_file, default_loader
+from torchvision.datasets.folder import default_loader
 
 classes = ['Sky', 'Building', 'Column-Pole', 'Road',
            'Sidewalk', 'Tree', 'Sign-Symbol', 'Fence', 'Car', 'Pedestrain',
@@ -34,12 +34,12 @@ class_color = [
     (0, 0, 0),
 ]
 
-
 def _make_dataset(dir):
     images = []
     for root, _, fnames in sorted(os.walk(dir)):
         for fname in fnames:
-            if is_image_file(fname):
+            if fname.endswith('.png'):
+            #if is_image_file(fname):
                 path = os.path.join(root, fname)
                 item = path
                 images.append(item)
