@@ -14,6 +14,7 @@ import torch.nn.functional as F
 
 from . import imgs as img_utils
 
+
 RESULTS_PATH = '.results/'
 WEIGHTS_PATH = '.weights/'
 
@@ -105,7 +106,7 @@ def adjust_learning_rate(lr, decay, optimizer, cur_epoch, n_epochs):
 
 def weights_init(m):
     if isinstance(m, nn.Conv2d):
-        nn.init.kaiming_uniform(m.weight)
+        nn.init.kaiming_uniform_(m.weight)
         m.bias.data.zero_()
 
 def predict(model, input_loader, n_batches=1):
@@ -129,6 +130,6 @@ def view_sample_predictions(model, loader, n):
         pred = get_predictions(output)
         batch_size = inputs.size(0)
         for i in range(min(n, batch_size)):
-            img_utils.view_image(inputs[i])
-            img_utils.view_annotated(targets[i])
-            img_utils.view_annotated(pred[i])
+            img_utils.view_image(inputs[i], "input")
+            img_utils.view_annotated(targets[i], "target")
+            img_utils.view_annotated(pred[i], "predict")

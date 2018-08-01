@@ -21,7 +21,7 @@ label_colours = np.array([Sky, Building, Pole, Road, Pavement,
       Tree, SignSymbol, Fence, Car, Pedestrian, Bicyclist, Unlabelled])
 
 
-def view_annotated(tensor, plot=True):
+def view_annotated(tensor, title, plot=True):
     temp = tensor.numpy()
     r = temp.copy()
     g = temp.copy()
@@ -36,6 +36,7 @@ def view_annotated(tensor, plot=True):
     rgb[:,:,1] = (g/255.0)#[:,:,1]
     rgb[:,:,2] = (b/255.0)#[:,:,2]
     if plot:
+        plt.title(title)
         plt.imshow(rgb)
         plt.show()
     else:
@@ -48,8 +49,9 @@ def decode_image(tensor):
     inp = std * inp + mean
     return inp
 
-def view_image(tensor):
+def view_image(tensor, title):
     inp = decode_image(tensor)
     inp = np.clip(inp, 0, 1)
     plt.imshow(inp)
+    plt.title(title)
     plt.show()
